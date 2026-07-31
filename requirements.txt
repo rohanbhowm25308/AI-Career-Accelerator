@@ -1,0 +1,13 @@
+Flask
+Flask-Cors
+Werkzeug
+pdfplumber
+python-docx
+scikit-learn
+reportlab
+gunicorn
+
+# Optional - only needed if you set ANTHROPIC_API_KEY to enable real
+# Claude-generated suggestions and interview feedback. The app runs fully
+# offline without it.
+anthropic
