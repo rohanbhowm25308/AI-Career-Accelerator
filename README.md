@@ -65,9 +65,6 @@ python app.py
 
 **Aspiring AI/ML Engineer · Data Scientist · Web Developer**
 
-[![LinkedIn](https://www.linkedin.com/in/rohan-bhowmik-b014473a1)
-[![GitHub](https://github.com/rohanbhowm25308)
-
 ---
 
 ⭐ **If you found this project useful or interesting, consider giving it a star — it really helps!**
