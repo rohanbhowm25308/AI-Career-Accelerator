@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ascend — AI Career Accelerator</title>
+<meta name="description" content="Ascend analyzes your resume, runs an AI mock interview, builds your skill roadmap, and matches you to internship tracks.">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<link rel="icon" href="data:,">
+</head>
+<body>
+
+<canvas id="networkCanvas"></canvas>
+
+<!--================ Nav ================-->
+<nav class="nav">
+    <div class="nav-inner">
+        <a href="#top" class="logo">
+            <svg class="mark" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M13 2L23 22H3L13 2Z" stroke="#FFB020" stroke-width="2" stroke-linejoin="round"/>
+                <circle cx="13" cy="14" r="2" fill="#47E0A6"/>
+            </svg>
+            AI Career Accelerator
+        </a>
+        <ul class="nav-links" id="navLinks">
+            <li><a href="#analyzer" data-nav="analyzer">Analyzer</a></li>
+            <li><a href="#interview" data-nav="interview">Interview</a></li>
+            <li><a href="#roadmap" data-nav="roadmap">Roadmap</a></li>
+            <li><a href="#internships" data-nav="internships">Internships</a></li>
+            <li><a href="#ai-suite" data-nav="ai-suite">AI Suite</a></li>
+        </ul>
+        <div class="nav-right">
+            <span class="pill" id="serverStatus"><span class="dot"></span><span id="serverStatusText">Checking server…</span></span>
+        </div>
+    </div>
+</nav>
+
+<!--================ Hero ================-->
+<header class="hero" id="top">
+    <div class="container hero-grid">
+        <div>
+            <div class="eyebrow">AI CAREER ACCELERATOR</div>
+            <h1>One resume in.<br>An <span class="accent-word">interview‑ready</span> plan out.</h1>
+            <p class="hero-sub">
+                Ascend scores your resume against any job description, runs a mock interview
+                on your actual skills, turns the gaps into a learning roadmap, and matches you
+                to internship tracks worth applying to — all offline-first, no API key required.
+            </p>
+            <div class="hero-cta">
+                <a href="#analyzer" class="btn btn-primary">Analyze my resume</a>
+                <a href="#journey" class="btn btn-secondary">See the flight path</a>
+            </div>
+            <div class="hero-stats">
+                <div class="hero-stat"><span class="num">33</span><span class="label">AI modules</span></div>
+                <div class="hero-stat"><span class="num">150+</span><span class="label">Skills tracked</span></div>
+            </div>
+        </div>
+        <div class="hero-visual">
+            <canvas id="aiChipCanvas"></canvas>
+        </div>
+    </div>
+</header>
+
+<!--================ Journey / Waypoint strip ================-->
+<section class="journey" id="journey">
+    <div class="container">
+        <div class="journey-line"></div>
+        <div class="journey-grid">
+            <a href="#analyzer" class="waypoint-card" data-waypoint="1">
+                <div class="waypoint-num">WAYPOINT 01</div>
+                <h3>Analyze</h3>
+                <p>Get an ATS score, a JD match score, and concrete suggestions.</p>
+            </a>
+            <a href="#interview" class="waypoint-card" data-waypoint="2">
+                <div class="waypoint-num">WAYPOINT 02</div>
+                <h3>Interview</h3>
+                <p>Practice behavioral + technical questions pulled from your skills.</p>
+            </a>
+            <a href="#roadmap" class="waypoint-card" data-waypoint="3">
+                <div class="waypoint-num">WAYPOINT 03</div>
+                <h3>Roadmap</h3>
+                <p>Turn missing skills into a phased, time-boxed learning plan.</p>
+            </a>
+            <a href="#internships" class="waypoint-card" data-waypoint="4">
+                <div class="waypoint-num">WAYPOINT 04</div>
+                <h3>Match</h3>
+                <p>See which internship tracks your current skills already fit.</p>
+            </a>
+            <a href="#ai-suite" class="waypoint-card" data-waypoint="5">
+                <div class="waypoint-num">WAYPOINT 05</div>
+                <h3>AI Suite</h3>
+                <p>29 extra AI modules — recruiter simulation, salary, avatars, and more.</p>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!--================ Module 1 — Resume Analyzer ================-->
+<section class="module" id="analyzer">
+    <div class="container">
+        <div class="module-header">
+            <div class="eyebrow"><span class="waypoint-index">01</span> ANALYZE</div>
+            <h2>Resume Analyzer</h2>
+            <p>Upload a resume and, optionally, a job description to get your ATS score, match score, and tailored suggestions.</p>
+        </div>
+
+        <div class="grid-2" style="margin-bottom:28px;">
+            <div class="card">
+                <label class="field-label">Resume file</label>
+                <label class="file-drop" id="fileDrop">
+                    <span class="file-icon">📄</span>
+                    <span>Drop a file or <strong>click to browse</strong></span>
+                    <div class="hint">PDF, DOCX or TXT — up to 10MB</div>
+                    <input type="file" id="resumeFile" accept=".pdf,.doc,.docx,.txt">
+                </label>
+                <p class="file-name" id="fileNameDisplay"></p>
+            </div>
+            <div class="card">
+                <label class="field-label">Job description (optional)</label>
+                <textarea id="jobDescription" placeholder="Paste a job description to unlock the match score and skill-gap analysis…"></textarea>
+                <p class="hint">Leave blank for a general ATS-quality check.</p>
+            </div>
+        </div>
+
+        <div style="display:flex; gap:14px; align-items:center; margin-bottom:36px;">
+            <button class="btn btn-primary" id="analyzeBtn">Analyze Resume</button>
+            <button class="btn btn-ghost" id="downloadReportBtn" style="display:none;">Download PDF report</button>
+        </div>
+
+        <div id="analyzerEmpty" class="card empty-state">Run an analysis to see your ATS score, match score, and suggestions here.</div>
+
+        <div id="analyzerResults" style="display:none;">
+            <div class="score-row">
+                <div class="score-ring-wrap">
+                    <div class="score-ring" id="atsScoreRing"><span id="atsScoreValue">0%</span></div>
+                    <div class="score-ring-label">ATS Score</div>
+                </div>
+                <div class="score-ring-wrap" id="matchScoreWrap" style="display:none;">
+                    <div class="score-ring" id="matchScoreRing"><span id="matchScoreValue">0%</span></div>
+                    <div class="score-ring-label">JD Match</div>
+                </div>
+                <div class="card" style="flex:1; min-width:240px;">
+                    <div class="field-label">Score breakdown</div>
+                    <div class="breakdown-bars" id="breakdownBars"></div>
+                </div>
+            </div>
+
+            <div class="grid-2" style="margin-bottom:22px;">
+                <div class="card">
+                    <div class="field-label">Skills found</div>
+                    <div class="chip-row" id="skillsFoundRow"></div>
+                </div>
+                <div class="card">
+                    <div class="field-label">Missing from job description</div>
+                    <div class="chip-row" id="missingSkillsRow"><span class="hint">Paste a job description above to see gaps.</span></div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="field-label">AI Suggestions</div>
+                <ul class="suggestion-list" id="suggestionsList"></ul>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!--================ Module 2 — Mock Interview ================-->
+<section class="module" id="interview">
+    <div class="container">
+        <div class="grid-2" style="align-items:center; margin-bottom:44px;">
+            <div class="module-header" style="margin-bottom:0;">
+                <div class="eyebrow"><span class="waypoint-index">02</span> INTERVIEW</div>
+                <h2>AI Mock Interview</h2>
+                <p>A short, mixed behavioral + technical interview based on the skills you detected — or pick a target role manually.</p>
+            </div>
+            <div class="chip-visual-card">
+                <canvas id="trajectoryCanvas" width="560" height="520"></canvas>
+            </div>
+        </div>
+
+        <div class="card interview-setup" id="interviewSetup">
+            <div class="grid-2">
+                <div>
+                    <label class="field-label">Target role</label>
+                    <select id="interviewRole"><option value="">Auto (from my resume skills)</option></select>
+                </div>
+                <div>
+                    <label class="field-label">Skill source</label>
+                    <div class="pill" id="interviewSkillSource" style="width:100%; justify-content:flex-start;">
+                        <span class="dot"></span><span id="interviewSkillSourceText">No analysis yet — run Waypoint 01 first, or pick a role above.</span>
+                    </div>
+                </div>
+            </div>
+            <div style="margin-top:16px;">
+                <label class="field-label">AI Interview Avatar — interviewer persona</label>
+                <div class="persona-row" id="personaRow"></div>
+                <p class="hint" id="personaIntroText"></p>
+            </div>
+            <button class="btn btn-primary" id="startInterviewBtn" style="margin-top:20px;">Start mock interview</button>
+        </div>
+
+        <div id="interviewRunner" style="display:none; margin-top:28px;">
+            <div class="progress-track"><div class="progress-fill" id="interviewProgress"></div></div>
+            <div class="qa-thread card" id="qaThread"></div>
+
+            <div class="card" id="answerBox" style="margin-top:16px;">
+                <label class="field-label">Your answer</label>
+                <textarea id="answerInput" placeholder="Type your answer… aim for a few concrete sentences."></textarea>
+                <div class="confidence-live" id="confidenceLive" style="display:none;">
+                    <span class="field-label" style="margin:0;">Live Confidence Meter</span>
+                    <span class="bar-track" style="flex:1;"><span class="bar-fill" id="confidenceLiveFill" style="width:0%;"></span></span>
+                    <span class="confidence-live-value" id="confidenceLiveValue">—</span>
+                </div>
+                <button class="btn btn-primary" id="submitAnswerBtn" style="margin-top:14px;">Submit answer</button>
+            </div>
+
+            <div class="card summary-card" id="interviewSummary" style="display:none;"></div>
+        </div>
+    </div>
+</section>
+
+<!--================ Module 3 — Skill Roadmap ================-->
+<section class="module" id="roadmap">
+    <div class="container">
+        <div class="module-header">
+            <div class="eyebrow"><span class="waypoint-index">03</span> ROADMAP</div>
+            <h2>Skill Gap Roadmap</h2>
+            <p>Missing skills, phased into Foundation → Intermediate → Advanced, with curated resources and a realistic timeline.</p>
+        </div>
+
+        <div class="card">
+            <div class="grid-3">
+                <div>
+                    <label class="field-label">Based on</label>
+                    <select id="roadmapSource">
+                        <option value="analysis">My last analysis (missing skills)</option>
+                        <option value="role">A target role</option>
+                    </select>
+                </div>
+                <div id="roadmapRoleField" style="display:none;">
+                    <label class="field-label">Target role</label>
+                    <select id="roadmapRole"></select>
+                </div>
+                <div>
+                    <label class="field-label">Hours / week you can study</label>
+                    <input type="number" id="roadmapHours" value="8" min="1" max="40">
+                </div>
+            </div>
+            <button class="btn btn-primary" id="buildRoadmapBtn" style="margin-top:20px;">Build my roadmap</button>
+        </div>
+
+        <div id="roadmapEmpty" class="card empty-state" style="margin-top:28px;">Build a roadmap to see your phased learning plan here.</div>
+
+        <div id="roadmapResults" style="display:none; margin-top:28px;">
+            <div class="roadmap-summary">
+                <div class="stat"><span class="num" id="roadmapTotalSkills">0</span><span class="label">Skills to learn</span></div>
+                <div class="stat"><span class="num" id="roadmapTotalHours">0</span><span class="label">Estimated hours</span></div>
+                <div class="stat"><span class="num" id="roadmapWeeks">0</span><span class="label">Weeks at your pace</span></div>
+            </div>
+            <div class="phase-columns" id="phaseColumns"></div>
+            <div class="card" id="roadmapCoursesCard" style="display:none; margin-top:20px;">
+                <div class="field-label">📚 Recommended courses for these gaps</div>
+                <div class="course-domain-groups" id="roadmapCourseGroups"></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!--================ Module 4 — Internship Matches ================-->
+<section class="module" id="internships">
+    <div class="container">
+        <div class="module-header">
+            <div class="eyebrow"><span class="waypoint-index">04</span> MATCH</div>
+            <h2>Internship Track Matches</h2>
+            <p>Illustrative early-career tracks ranked by how well your current skills already fit, with links to real search platforms.</p>
+        </div>
+
+        <div class="card">
+            <label class="field-label">Skills to match (auto-filled after Waypoint 01, editable)</label>
+            <input type="text" id="internshipSkillsInput" placeholder="e.g. python, sql, react, git">
+            <p class="hint">Comma-separated. We'll match these against common internship tracks.</p>
+            <button class="btn btn-primary" id="findInternshipsBtn" style="margin-top:16px;">Find matching tracks</button>
+        </div>
+
+        <div id="internshipsEmpty" class="card empty-state" style="margin-top:28px;">Find your matches to see ranked internship tracks here.</div>
+
+        <div id="internshipsResults" style="display:none; margin-top:28px;">
+            <div class="track-list" id="trackList"></div>
+            <div class="platform-row" id="platformRow"></div>
+        </div>
+    </div>
+</section>
+
+<!--================ Module 5 — Ascend AI Suite (15 modules) ================-->
+<section class="module" id="ai-suite">
+    <div class="container">
+        <div class="module-header">
+            <div class="eyebrow"><span class="waypoint-index">05</span> AI SUITE</div>
+            <h2>Ascend AI Suite</h2>
+            <p>29 focused AI modules layered on top of your resume analysis — recruiter simulation, career projections, live interview coaching, and document tools. Run Waypoint 01 first so most modules here can use your real skills and score.</p>
+        </div>
+
+        <div class="suite-layout">
+            <div class="suite-tabs" id="suiteTabs">
+                <div class="suite-group-label">Resume Intelligence</div>
+                <button class="suite-tab active" data-suite="recruiter-mode">🕵️ AI Recruiter Mode</button>
+                <button class="suite-tab" data-suite="hiring-simulation">🏢 AI Hiring Simulation</button>
+                <button class="suite-tab" data-suite="time-machine">⏳ Career Time Machine</button>
+                <button class="suite-tab" data-suite="career-story">📖 AI Career Story</button>
+                <button class="suite-tab" data-suite="eye-tracking">👁️ Recruiter Eye Tracking</button>
+                <button class="suite-tab" data-suite="recruiter-psychology">⏱️ Recruiter Psychology</button>
+                <button class="suite-tab" data-suite="heatmap">🔥 Resume Heatmap</button>
+                <button class="suite-tab" data-suite="skill-radar">🕸️ AI Skill Radar</button>
+                <button class="suite-tab" data-suite="career-risk">⚠️ Career Risk Score</button>
+                <button class="suite-tab" data-suite="stress-test">🧪 AI Resume Stress Test</button>
+                <button class="suite-tab" data-suite="resume-battle">⚔️ AI Resume Battle</button>
+                <button class="suite-tab" data-suite="resume-evolution">🌱 AI Resume Evolution</button>
+                <button class="suite-tab" data-suite="decision-explanation">🧾 Recruiter Decision Explanation</button>
+
+                <div class="suite-group-label">Career Planning</div>
+                <button class="suite-tab" data-suite="career-twin">🧬 AI Career Twin</button>
+                <button class="suite-tab" data-suite="timeline">📈 Timeline Prediction</button>
+                <button class="suite-tab" data-suite="career-gps">🧭 AI Career GPS</button>
+                <button class="suite-tab" data-suite="salary">💰 Salary Prediction</button>
+                <button class="suite-tab" data-suite="hidden-talent">💎 Hidden Talent Detector</button>
+                <button class="suite-tab" data-suite="scorecard">🧬 AI Career Score Card</button>
+                <button class="suite-tab" data-suite="opportunity-radar">📡 AI Opportunity Radar</button>
+                <button class="suite-tab" data-suite="dream-company">🏆 Dream Company Simulator</button>
+                <button class="suite-tab" data-suite="hackathon-partner">🤝 Hackathon Partner Finder</button>
+
+                <div class="suite-group-label">Interview Coaching</div>
+                <button class="suite-tab" data-suite="confidence">🎙️ Live Confidence Meter</button>
+                <button class="suite-tab" data-suite="interview-replay">🎬 AI Interview Replay</button>
+                <button class="suite-tab" data-suite="achievement">✍️ Achievement Generator</button>
+
+                <div class="suite-group-label">Documents &amp; Reviews</div>
+                <button class="suite-tab" data-suite="compare-versions">📑 Resume Version Comparison</button>
+                <button class="suite-tab" data-suite="portfolio-review">💼 AI Portfolio Review</button>
+                <button class="suite-tab" data-suite="hr-summary">📋 One-Click HR Summary</button>
+
+                <div class="suite-group-label">Learning</div>
+                <button class="suite-tab" data-suite="course-explorer">📚 Course Explorer</button>
+            </div>
+
+            <div class="suite-content">
+
+                <!-- 1. AI Recruiter Mode -->
+                <div class="suite-panel active" id="panel-recruiter-mode">
+                    <h3>AI Recruiter Mode</h3>
+                    <p class="hint">Simulates a recruiter's real ~6-second first scan of your resume: what stands out, what raises a red flag, and the order it gets scanned in.</p>
+                    <button class="btn btn-primary" id="rmRunBtn">Run recruiter scan</button>
+                    <div class="suite-empty" id="rmEmpty">Run the scan to see your first-impression verdict.</div>
+                    <div class="suite-result" id="rmResult" style="display:none;">
+                        <div class="score-row">
+                            <div class="score-ring-wrap">
+                                <div class="score-ring" id="rmScoreRing"><span id="rmScoreValue">0%</span></div>
+                                <div class="score-ring-label">First impression</div>
+                            </div>
+                            <div class="card" style="flex:1; min-width:220px;">
+                                <div class="verdict-badge" id="rmVerdict"></div>
+                                <p id="rmHeadline" style="margin-top:8px;"></p>
+                            </div>
+                        </div>
+                        <div class="grid-2">
+                            <div class="card"><div class="field-label">👍 Positive signals</div><ul class="suggestion-list" id="rmPositives"></ul></div>
+                            <div class="card"><div class="field-label">🚩 Red flags</div><ul class="suggestion-list" id="rmFlags"></ul></div>
+                        </div>
+                        <div class="card"><div class="field-label">Scan order</div><div class="chip-row" id="rmScanOrder"></div></div>
+                    </div>
+                </div>
+
+                <!-- 2. AI Hiring Simulation -->
+                <div class="suite-panel" id="panel-hiring-simulation">
+                    <h3>AI Hiring Simulation</h3>
+                    <p class="hint">Walks your resume through a realistic staged hiring pipeline — HR Screening, Technical Lead Review, then the Hiring Committee's call — using the same scores from your Analyzer report, just staged the way a real hiring loop works.</p>
+                    <button class="btn btn-primary" id="hsRunBtn">Run hiring simulation</button>
+                    <div class="suite-empty" id="hsEmpty">Run the simulation to walk through the pipeline.</div>
+                    <div class="suite-result" id="hsResult" style="display:none;">
+
+                        <div class="card hs-stage" id="hsStageHR">
+                            <div class="field-label">Stage 1 · HR Screening</div>
+                            <div class="verdict-badge" id="hsHRVerdict"></div>
+                            <ul class="suggestion-list" id="hsHRChecks" style="margin-top:10px;"></ul>
+                        </div>
+
+                        <div class="card hs-stage" id="hsStageTech">
+                            <div class="field-label">Stage 2 · Technical Lead Review</div>
+                            <div class="score-row">
+                                <div class="score-ring-wrap">
+                                    <div class="score-ring" id="hsTechScoreRing"><span id="hsTechScoreValue">0%</span></div>
+                                    <div class="score-ring-label">Technical score</div>
+                                </div>
+                                <div class="card" style="flex:1; min-width:220px;">
+                                    <div class="field-label">Questions a recruiter may ask</div>
+                                    <ol id="hsQuestions" style="margin:8px 0 0; padding-left:18px;"></ol>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card hs-stage" id="hsStageManager">
+                            <div class="field-label">Stage 3 · Hiring Committee</div>
+                            <div class="score-row">
+                                <div class="score-ring-wrap">
+                                    <div class="score-ring" id="hsChanceRing"><span id="hsChanceValue">0%</span></div>
+                                    <div class="score-ring-label">Interview chance</div>
+                                </div>
+                                <div class="card" style="flex:1; min-width:220px;">
+                                    <div class="verdict-badge" id="hsFinalVerdict"></div>
+                                    <ul class="suggestion-list" id="hsFactors" style="margin-top:10px;"></ul>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- 2b. AI Career Time Machine -->
+                <div class="suite-panel" id="panel-time-machine">
+                    <h3>AI Career Time Machine</h3>
+                    <p class="hint">Projects your skills, resume score, and salary range forward through 6 months, 1 year, 2 years, and 5 years — assuming steady progress on your Career GPS roadmap. An illustrative projection, not a guarantee.</p>
+                    <button class="btn btn-primary" id="tmRunBtn">Travel forward</button>
+                    <div class="suite-empty" id="tmEmpty">Run the time machine to see your projected path.</div>
+                    <div class="suite-result" id="tmResult" style="display:none;">
+                        <div class="tm-track" id="tmTrack"></div>
+                        <p class="tip-line" id="tmAssumption"></p>
+                    </div>
+                </div>
+
+                <!-- 3. AI Career Story -->
+                <div class="suite-panel" id="panel-career-story">
+                    <h3>AI Career Story</h3>
+                    <p class="hint">Turns your resume into a short narrative — where you started, what you've built, and the recommended next chapter — built from your real detected skills and scores, not a generic template.</p>
+                    <button class="btn btn-primary" id="csRunBtn">Generate my story</button>
+                    <div class="suite-empty" id="csEmpty">Generate your story to see it here.</div>
+                    <div class="suite-result" id="csResult" style="display:none;">
+                        <div class="card">
+                            <div class="field-label" id="csStageLabel"></div>
+                            <p id="csStory" style="margin-top:8px; line-height:1.7; font-size:15px;"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. Recruiter Eye Tracking -->
+                <div class="suite-panel" id="panel-eye-tracking">
+                    <h3>Recruiter Eye Tracking</h3>
+                    <p class="hint">A simulated attention heatmap showing roughly how a recruiter's eyes move across your resume, based on published resume eye-tracking research.</p>
+                    <button class="btn btn-primary" id="etRunBtn">Simulate eye tracking</button>
+                    <div class="suite-empty" id="etEmpty">Run the simulation to see the attention breakdown.</div>
+                    <div class="suite-result" id="etResult" style="display:none;">
+                        <p class="hint" id="etPattern"></p>
+                        <div class="breakdown-bars" id="etZones"></div>
+                        <div class="card"><div class="field-label">Dead zones (near-zero attention)</div><div class="chip-row missing" id="etDeadZones"></div></div>
+                        <p class="tip-line" id="etTip"></p>
+                    </div>
+                </div>
+
+                <!-- 7. AI Resume Heatmap -->
+                <div class="suite-panel" id="panel-heatmap">
+                    <h3>AI Resume Heatmap</h3>
+                    <p class="hint">Per-section strength score — hot sections are recruiter-ready, cold sections need attention first.</p>
+                    <button class="btn btn-primary" id="hmRunBtn">Generate heatmap</button>
+                    <div class="suite-empty" id="hmEmpty">Generate the heatmap to see per-section strength.</div>
+                    <div class="suite-result" id="hmResult" style="display:none;">
+                        <div class="heatmap-grid" id="hmGrid"></div>
+                        <p class="hint">Legend: <span class="heat-chip hot">hot = recruiter-ready</span> <span class="heat-chip warm">warm = needs polish</span> <span class="heat-chip cold">cold = fix first</span></p>
+                        <p class="tip-line">Weakest zone: <strong id="hmWeakest"></strong> · Skill keyword density: <strong id="hmDensity"></strong></p>
+                    </div>
+                </div>
+
+                <!-- 8. AI Skill Radar -->
+                <div class="suite-panel" id="panel-skill-radar">
+                    <h3>AI Skill Radar</h3>
+                    <p class="hint">Your skills grouped into categories and scored against a well-rounded benchmark for your target role.</p>
+                    <div class="grid-2">
+                        <div><label class="field-label">Target role (optional)</label><select id="srRole"><option value="">None</option></select></div>
+                        <div style="align-self:flex-end;"><button class="btn btn-primary" id="srRunBtn">Generate radar</button></div>
+                    </div>
+                    <div class="suite-empty" id="srEmpty">Generate the radar to see category coverage.</div>
+                    <div class="suite-result" id="srResult" style="display:none;">
+                        <div class="breakdown-bars" id="srAxes"></div>
+                        <p class="tip-line">Strongest: <strong id="srStrong"></strong> · Weakest: <strong id="srWeak"></strong> <span id="srRoleFitWrap" style="display:none;"> · Role fit: <strong id="srRoleFit"></strong></span></p>
+                    </div>
+                </div>
+
+                <!-- 14. AI Career Risk Score -->
+                <div class="suite-panel" id="panel-career-risk">
+                    <h3>AI Career Risk Score</h3>
+                    <p class="hint">Skill-obsolescence and stagnation risk — flags fading skills and rewards trending, diversified skill sets.</p>
+                    <button class="btn btn-primary" id="crsRunBtn">Calculate risk score</button>
+                    <div class="suite-empty" id="crsEmpty">Calculate to see your obsolescence risk.</div>
+                    <div class="suite-result" id="crsResult" style="display:none;">
+                        <div class="score-row">
+                            <div class="score-ring-wrap">
+                                <div class="score-ring" id="crsRing"><span id="crsScoreValue">0%</span></div>
+                                <div class="score-ring-label">Risk score</div>
+                            </div>
+                            <div class="card" style="flex:1; min-width:220px;">
+                                <div class="verdict-badge" id="crsLevel"></div>
+                                <p style="margin-top:8px;">Category diversity: <strong id="crsDiversity"></strong></p>
+                            </div>
+                        </div>
+                        <div class="grid-2">
+                            <div class="card"><div class="field-label">Factors</div><ul class="suggestion-list" id="crsFactors"></ul></div>
+                            <div class="card"><div class="field-label">Recommendations</div><ul class="suggestion-list" id="crsRecs"></ul></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AI Resume Stress Test -->
+                <div class="suite-panel" id="panel-stress-test">
+                    <h3>AI Resume Stress Test</h3>
+                    <p class="hint">Runs your resume against 5 illustrative hiring-profile archetypes at once, each weighting skills differently, so you can see how differently-styled employers might read the same resume.</p>
+                    <button class="btn btn-primary" id="stRunBtn">Run stress test</button>
+                    <div class="suite-empty" id="stEmpty">Run the test to see all 5 results.</div>
+                    <div class="suite-result" id="stResult" style="display:none;">
+                        <div class="st-grid" id="stGrid"></div>
+                    </div>
+                </div>
+
+                <!-- AI Resume Battle -->
+                <div class="suite-panel" id="panel-resume-battle">
+                    <h3>AI Resume Battle</h3>
+                    <p class="hint">Upload two resumes and see which one wins on Skills, Projects/Experience depth, Quantified Impact, and overall ATS score.</p>
+                    <div class="grid-2">
+                        <div>
+                            <label class="field-label">Resume A</label>
+                            <input type="file" id="rbFileA" accept=".pdf,.docx,.txt" />
+                        </div>
+                        <div>
+                            <label class="field-label">Resume B</label>
+                            <input type="file" id="rbFileB" accept=".pdf,.docx,.txt" />
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" id="rbRunBtn" style="margin-top:12px;">Start the battle</button>
+                    <div class="suite-empty" id="rbEmpty">Upload two resumes to battle them.</div>
+                    <div class="suite-result" id="rbResult" style="display:none;">
+                        <div class="verdict-badge" id="rbOverall" style="margin-bottom:12px;"></div>
+                        <div id="rbCategories"></div>
+                        <div class="grid-2" style="margin-top:12px;">
+                            <div class="card"><div class="field-label">Only in A</div><div class="chip-row" id="rbOnlyA"></div></div>
+                            <div class="card"><div class="field-label">Only in B</div><div class="chip-row" id="rbOnlyB"></div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AI Resume Evolution -->
+                <div class="suite-panel" id="panel-resume-evolution">
+                    <h3>AI Resume Evolution</h3>
+                    <p class="hint">A hypothetical improvement path, fixing your weakest scoring categories in priority order — showing how your ATS score would climb if you applied each fix.</p>
+                    <button class="btn btn-primary" id="reRunBtn">Show my evolution path</button>
+                    <div class="suite-empty" id="reEmpty">Run it to see the projected improvement path.</div>
+                    <div class="suite-result" id="reResult" style="display:none;">
+                        <div class="tm-track" id="reTrack"></div>
+                        <p class="tip-line">Total projected gain: <strong id="reTotalGain"></strong> ATS points.</p>
+                    </div>
+                </div>
+
+                <!-- AI Recruiter Decision Explanation -->
+                <div class="suite-panel" id="panel-decision-explanation">
+                    <h3>AI Recruiter Decision Explanation</h3>
+                    <p class="hint">Instead of a flat pass/reject, this breaks down exactly why — and how many ATS points fixing each issue would realistically earn back.</p>
+                    <button class="btn btn-primary" id="deRunBtn">Explain my score</button>
+                    <div class="suite-empty" id="deEmpty">Run it to see the breakdown.</div>
+                    <div class="suite-result" id="deResult" style="display:none;">
+                        <div class="score-row">
+                            <div class="score-ring-wrap">
+                                <div class="score-ring" id="deRing"><span id="deScoreValue">0%</span></div>
+                                <div class="score-ring-label">Current ATS score</div>
+                            </div>
+                            <div class="card" style="flex:1; min-width:220px;">
+                                <div class="verdict-badge" id="deVerdict"></div>
+                                <p style="margin-top:8px;">Total estimated improvement: <strong id="deTotalGain"></strong> ATS points.</p>
+                            </div>
+                        </div>
+                        <ul class="suggestion-list" id="deIssues" style="margin-top:12px;"></ul>
+                    </div>
+                </div>
+
+                <!-- AI Recruiter Psychology -->
+                <div class="suite-panel" id="panel-recruiter-psychology">
+                    <h3>AI Recruiter Psychology</h3>
+                    <p class="hint">A timed simulation of a recruiter's first scan — based on published resume eye-tracking research applied to your resume's own layout.</p>
+                    <button class="btn btn-primary" id="rpRunBtn">Simulate the scan</button>
+                    <div class="suite-empty" id="rpEmpty">Run it to watch the scan happen.</div>
+                    <div class="suite-result" id="rpResult" style="display:none;">
+                        <div class="rp-scan-wrap">
+                            <div class="rp-timer" id="rpTimer">6.8s</div>
+                            <div class="rp-bar-track"><div class="rp-bar-fill" id="rpBarFill"></div></div>
+                        </div>
+                        <div class="grid-2" style="margin-top:14px;">
+                            <div class="card"><div class="field-label">✅ Looked At</div><div class="chip-row" id="rpLookedAt"></div></div>
+                            <div class="card"><div class="field-label">🚫 Ignored</div><div class="chip-row missing" id="rpIgnored"></div></div>
+                        </div>
+                        <p class="tip-line" id="rpTip"></p>
+                    </div>
+                </div>
+
+                <!-- 3. AI Career Twin -->
+                <div class="suite-panel" id="panel-career-twin">
+                    <h3>AI Career Twin</h3>
+                    <p class="hint">A forward-projected version of you — where your skills place you today, and a 1 / 3 / 5-year growth path.</p>
+                    <div class="grid-2">
+                        <div><label class="field-label">Target role (optional)</label><select id="ctRole"><option value="">Auto-detect closest match</option></select></div>
+                        <div style="align-self:flex-end;"><button class="btn btn-primary" id="ctRunBtn">Generate my career twin</button></div>
+                    </div>
+                    <div class="suite-empty" id="ctEmpty">Generate your twin to see your projected growth path.</div>
+                    <div class="suite-result" id="ctResult" style="display:none;">
+                        <div class="card">
+                            <p class="hint">Current stage: <strong id="ctStage"></strong> · Closest role match: <strong id="ctRoleMatch"></strong> (<span id="ctRoleMatchPct"></span>)</p>
+                            <p id="ctNarrative" style="margin-top:10px;"></p>
+                        </div>
+                        <div class="twin-path" id="ctPath"></div>
+                    </div>
+                </div>
+
+                <!-- 2. Resume Timeline Prediction -->
+                <div class="suite-panel" id="panel-timeline">
+                    <h3>Resume Timeline Prediction</h3>
+                    <p class="hint">An explainable, formula-based projection of your callback / interview timeline, based on your profile strength.</p>
+                    <div class="grid-2">
+                        <div><label class="field-label">Applications you'll send per week</label><input type="number" id="tlApps" value="10" min="1" max="100"></div>
+                        <div style="align-self:flex-end;"><button class="btn btn-primary" id="tlRunBtn">Predict my timeline</button></div>
+                    </div>
+                    <div class="suite-empty" id="tlEmpty">Predict your timeline to see expected milestones.</div>
+                    <div class="suite-result" id="tlResult" style="display:none;">
+                        <div class="roadmap-summary">
+                            <div class="stat"><span class="num" id="tlStrength">0</span><span class="label">Profile strength</span></div>
+                            <div class="stat"><span class="num" id="tlCallback">0%</span><span class="label">Est. callback rate</span></div>
+                            <div class="stat"><span class="num" id="tlInterview">0%</span><span class="label">Est. interview rate</span></div>
+                        </div>
+                        <div class="timeline-track" id="tlMilestones"></div>
+                        <p class="hint" id="tlDisclaimer"></p>
+                    </div>
+                </div>
+
+                <!-- 10. AI Career GPS -->
+                <div class="suite-panel" id="panel-career-gps">
+                    <h3>AI Career GPS</h3>
+                    <p class="hint">Turn-by-turn navigation from where you are now to a target role, with an ETA in weeks.</p>
+                    <div class="grid-3">
+                        <div><label class="field-label">Destination role</label><select id="gpsRole"><option value="">Choose a role…</option></select></div>
+                        <div><label class="field-label">Hours / week</label><input type="number" id="gpsHours" value="8" min="1" max="40"></div>
+                        <div style="align-self:flex-end;"><button class="btn btn-primary" id="gpsRunBtn">Start navigation</button></div>
+                    </div>
+                    <div class="suite-empty" id="gpsEmpty">Pick a destination role to get turn-by-turn directions.</div>
+                    <div class="suite-result" id="gpsResult" style="display:none;">
+                        <div class="roadmap-summary">
+                            <div class="stat"><span class="num" id="gpsCurrent">0%</span><span class="label">Current location</span></div>
+                            <div class="stat"><span class="num" id="gpsRemaining">0</span><span class="label">Skills remaining</span></div>
+                            <div class="stat"><span class="num" id="gpsEta">0</span><span class="label">ETA (weeks)</span></div>
+                        </div>
+                        <div class="gps-directions" id="gpsDirections"></div>
+                    </div>
+                </div>
+
+                <!-- 9. Personalized Salary Prediction -->
+                <div class="suite-panel" id="panel-salary">
+                    <h3>Personalized Salary Prediction</h3>
+                    <p class="hint">A directional salary-range estimate from role, experience and skill overlap — not live market data.</p>
+                    <div class="grid-3">
+                        <div><label class="field-label">Target role</label><select id="spRole"><option value="">Auto-detect closest match</option></select></div>
+                        <div><label class="field-label">Years of experience</label><input type="number" id="spExp" value="0" min="0" max="20" step="0.5"></div>
+                        <div><label class="field-label">Location tier</label>
+                            <select id="spLocation">
+                                <option value="metro">Metro city</option>
+                                <option value="tier2">Tier-2 city</option>
+                                <option value="remote_global">Remote / global</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" id="spRunBtn" style="margin-top:16px;">Predict salary range</button>
+                    <div class="suite-empty" id="spEmpty">Predict to see your estimated salary range.</div>
+                    <div class="suite-result" id="spResult" style="display:none;">
+                        <div class="card salary-card">
+                            <div class="field-label">Estimated range for <span id="spRoleOut"></span></div>
+                            <div class="salary-range" id="spRange"></div>
+                            <p class="hint" id="spDisclaimer"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hidden Talent Detector -->
+                <div class="suite-panel" id="panel-hidden-talent">
+                    <h3>AI Hidden Talent Detector</h3>
+                    <p class="hint">Looks past missing skills to find strengths implied by your skill mix and breadth — then suggests roles that fit those strengths.</p>
+                    <button class="btn btn-primary" id="htRunBtn">Detect hidden talents</button>
+                    <div class="suite-empty" id="htEmpty">Run it to see your detected talents.</div>
+                    <div class="suite-result" id="htResult" style="display:none;">
+                        <div class="card"><div class="field-label">Detected talents</div><div class="chip-row" id="htTalents"></div></div>
+                        <div class="card" style="margin-top:12px;"><div class="field-label">Recommended roles</div><ul class="suggestion-list" id="htRoles"></ul></div>
+                    </div>
+                </div>
+
+                <!-- AI Career Score Card -->
+                <div class="suite-panel" id="panel-scorecard">
+                    <h3>AI Career Score Card</h3>
+                    <p class="hint">Your "Career DNA" — six dimensions derived from your resume's real structure and skill mix, not a certified assessment.</p>
+                    <button class="btn btn-primary" id="scRunBtn">Generate score card</button>
+                    <div class="suite-empty" id="scEmpty">Run it to see your Career DNA.</div>
+                    <div class="suite-result" id="scResult" style="display:none;">
+                        <div class="breakdown-bars" id="scBars"></div>
+                        <p class="tip-line">Strongest: <strong id="scStrong"></strong> · Weakest: <strong id="scWeak"></strong></p>
+                    </div>
+                </div>
+
+                <!-- AI Opportunity Radar -->
+                <div class="suite-panel" id="panel-opportunity-radar">
+                    <h3>AI Opportunity Radar</h3>
+                    <p class="hint">Fit score across 5 opportunity types — internships, hackathons, research, open source, and freelancing — estimated from your resume's real signals.</p>
+                    <button class="btn btn-primary" id="orRunBtn">Scan opportunities</button>
+                    <div class="suite-empty" id="orEmpty">Run it to see your best-fit opportunity types.</div>
+                    <div class="suite-result" id="orResult" style="display:none;">
+                        <div class="breakdown-bars" id="orBars"></div>
+                        <p class="tip-line">Top opportunity: <strong id="orTop"></strong></p>
+                    </div>
+                </div>
+
+                <!-- Dream Company Simulator -->
+                <div class="suite-panel" id="panel-dream-company">
+                    <h3>AI Dream Company Simulator</h3>
+                    <p class="hint">Pick a company archetype and see your current match, what's missing, and an estimated readiness timeline.</p>
+                    <div class="grid-2">
+                        <div><label class="field-label">Company</label>
+                            <select id="dcCompany">
+                                <option value="Google">Google</option>
+                                <option value="Amazon">Amazon</option>
+                                <option value="Microsoft">Microsoft</option>
+                                <option value="Startup">Startup</option>
+                                <option value="Bank">Bank</option>
+                            </select>
+                        </div>
+                        <div style="align-self:flex-end;"><button class="btn btn-primary" id="dcRunBtn">Simulate</button></div>
+                    </div>
+                    <div class="suite-empty" id="dcEmpty">Pick a company and simulate to see your fit.</div>
+                    <div class="suite-result" id="dcResult" style="display:none;">
+                        <div class="score-row">
+                            <div class="score-ring-wrap">
+                                <div class="score-ring" id="dcRing"><span id="dcMatchValue">0%</span></div>
+                                <div class="score-ring-label">Current match</div>
+                            </div>
+                            <div class="card" style="flex:1; min-width:220px;">
+                                <p>Estimated ready in <strong id="dcReady"></strong> months.</p>
+                                <div class="field-label">Need</div>
+                                <div class="chip-row missing" id="dcNeed"></div>
+                            </div>
+                        </div>
+                        <p class="hint" id="dcDisclaimer"></p>
+                    </div>
+                </div>
+
+                <!-- Hackathon Partner Finder -->
+                <div class="suite-panel" id="panel-hackathon-partner">
+                    <h3>AI Hackathon Partner Finder</h3>
+                    <p class="hint">This app doesn't have a database of other users to match you against — so instead of a fake match, here's the honest version: your real strengths, and the skill categories an ideal teammate would cover.</p>
+                    <button class="btn btn-primary" id="hpRunBtn">Find my teammate gaps</button>
+                    <div class="suite-empty" id="hpEmpty">Run it to see your teammate profile.</div>
+                    <div class="suite-result" id="hpResult" style="display:none;">
+                        <div class="grid-2">
+                            <div class="card"><div class="field-label">Your strengths</div><div class="chip-row" id="hpStrengths"></div></div>
+                            <div class="card"><div class="field-label">Ideal teammate covers</div><div class="chip-row missing" id="hpCovers"></div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 6. Live Confidence Meter (standalone text analyzer) -->
+                <div class="suite-panel" id="panel-confidence">
+                    <h3>Live Confidence Meter</h3>
+                    <p class="hint">Paste any interview answer (or practice it live in the Mock Interview module above) to see a real-time confidence read.</p>
+                    <textarea id="cmText" placeholder="Paste an answer to analyze, e.g. 'I think I sort of helped with the deployment...'"></textarea>
+                    <button class="btn btn-primary" id="cmRunBtn" style="margin-top:10px;">Analyze confidence</button>
+                    <div class="suite-empty" id="cmEmpty">Analyze some text to see your confidence score.</div>
+                    <div class="suite-result" id="cmResult" style="display:none;">
+                        <div class="score-row">
+                            <div class="score-ring-wrap">
+                                <div class="score-ring" id="cmRing"><span id="cmScoreValue">0%</span></div>
+                                <div class="score-ring-label" id="cmLevel">Confidence</div>
+                            </div>
+                            <div class="card" style="flex:1; min-width:220px;">
+                                <p class="hint">Hedging phrases: <strong id="cmHedges"></strong> · Filler words: <strong id="cmFillers"></strong> · Assertive statements: <strong id="cmAssertive"></strong></p>
+                            </div>
+                        </div>
+                        <div class="card"><div class="field-label">Tips</div><ul class="suggestion-list" id="cmTips"></ul></div>
+                    </div>
+                </div>
+
+                <!-- AI Interview Replay -->
+                <div class="suite-panel" id="panel-interview-replay">
+                    <h3>AI Interview Replay</h3>
+                    <p class="hint">A YouTube-style replay of your last mock interview — timestamps estimated from each answer's length at an average speaking pace (this app doesn't record audio/video, so these are calculated markers, not a real recording). Complete at least one answer in the Interview module (Waypoint 02) first.</p>
+                    <button class="btn btn-primary" id="irRunBtn">Generate replay</button>
+                    <div class="suite-empty" id="irEmpty">Answer at least one interview question, then generate your replay.</div>
+                    <div class="suite-result" id="irResult" style="display:none;">
+                        <div class="ir-scrubber" id="irScrubber"></div>
+                        <div class="ir-markers" id="irMarkers"></div>
+                    </div>
+                </div>
+
+                <!-- 15. AI Achievement Generator -->
+                <div class="suite-panel" id="panel-achievement">
+                    <h3>AI Achievement Generator</h3>
+                    <p class="hint">Rewrites a weak resume bullet using strong action verbs and the XYZ formula — never invents fake metrics.</p>
+                    <label class="field-label">Your bullet point</label>
+                    <textarea id="agBullet" placeholder="e.g. Helped with the database migration project"></textarea>
+                    <label class="field-label">Relevant skill/tool (optional)</label>
+                    <input type="text" id="agSkill" placeholder="e.g. PostgreSQL">
+                    <button class="btn btn-primary" id="agRunBtn" style="margin-top:10px;">Rewrite my bullet</button>
+                    <div class="suite-empty" id="agEmpty">Enter a bullet point to get a stronger rewrite.</div>
+                    <div class="suite-result" id="agResult" style="display:none;">
+                        <div class="card"><div class="field-label">Rule-based rewrite</div><p id="agRule"></p></div>
+                        <div class="card"><div class="field-label">XYZ formula rewrite</div><p id="agXYZ"></p></div>
+                        <div class="card" id="agAICard" style="display:none;"><div class="field-label">AI rewrite</div><p id="agAI"></p></div>
+                        <p class="tip-line" id="agTip"></p>
+                    </div>
+                </div>
+
+                <!-- 11. Resume Version Comparison -->
+                <div class="suite-panel" id="panel-compare-versions">
+                    <h3>Resume Version Comparison</h3>
+                    <p class="hint">Upload two versions of your resume to see which one scores better and exactly what changed.</p>
+                    <div class="grid-2">
+                        <div class="card">
+                            <label class="field-label">Version A</label>
+                            <label class="file-drop" id="cvDropA">
+                                <span class="file-icon">📄</span><span>Click to browse</span>
+                                <input type="file" id="cvFileA" accept=".pdf,.doc,.docx,.txt">
+                            </label>
+                            <p class="file-name" id="cvFileANameDisplay"></p>
+                        </div>
+                        <div class="card">
+                            <label class="field-label">Version B</label>
+                            <label class="file-drop" id="cvDropB">
+                                <span class="file-icon">📄</span><span>Click to browse</span>
+                                <input type="file" id="cvFileB" accept=".pdf,.doc,.docx,.txt">
+                            </label>
+                            <p class="file-name" id="cvFileBNameDisplay"></p>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" id="cvRunBtn" style="margin-top:16px;">Compare versions</button>
+                    <div class="suite-empty" id="cvEmpty">Upload both versions to compare them.</div>
+                    <div class="suite-result" id="cvResult" style="display:none;">
+                        <div class="roadmap-summary">
+                            <div class="stat"><span class="num" id="cvAtsA">0</span><span class="label">Version A ATS</span></div>
+                            <div class="stat"><span class="num" id="cvAtsB">0</span><span class="label">Version B ATS</span></div>
+                            <div class="stat"><span class="num" id="cvDelta">0</span><span class="label">Delta (B − A)</span></div>
+                        </div>
+                        <p class="verdict-badge" id="cvVerdict"></p>
+                        <div class="grid-2">
+                            <div class="card"><div class="field-label">Skills added in B</div><div class="chip-row matched" id="cvAdded"></div></div>
+                            <div class="card"><div class="field-label">Skills removed in B</div><div class="chip-row missing" id="cvRemoved"></div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 12. AI Portfolio Review -->
+                <div class="suite-panel" id="panel-portfolio-review">
+                    <h3>AI Portfolio Review</h3>
+                    <p class="hint">Paste your portfolio / project descriptions to check for live demos, source links, visuals, impact metrics, and docs.</p>
+                    <textarea id="prText" placeholder="Paste project descriptions from your portfolio site, GitHub README, or resume Projects section…"></textarea>
+                    <button class="btn btn-primary" id="prRunBtn" style="margin-top:10px;">Review my portfolio</button>
+                    <div class="suite-empty" id="prEmpty">Paste your portfolio text to get a completeness review.</div>
+                    <div class="suite-result" id="prResult" style="display:none;">
+                        <div class="score-row">
+                            <div class="score-ring-wrap">
+                                <div class="score-ring" id="prRing"><span id="prScoreValue">0%</span></div>
+                                <div class="score-ring-label">Completeness</div>
+                            </div>
+                            <div class="card" style="flex:1; min-width:220px;">
+                                <div class="field-label">Tech stack detected</div>
+                                <div class="chip-row" id="prTechStack"></div>
+                            </div>
+                        </div>
+                        <div class="card" id="prAICard" style="display:none;"><div class="field-label">AI review</div><p id="prAIReview"></p></div>
+                        <div class="card"><div class="field-label">Suggestions</div><ul class="suggestion-list" id="prSuggestions"></ul></div>
+                    </div>
+                </div>
+
+                <!-- 13. One-Click HR Summary -->
+                <div class="suite-panel" id="panel-hr-summary">
+                    <h3>One-Click HR Summary</h3>
+                    <p class="hint">A recruiter-ready screening summary generated from only the facts already in your resume — no invented details.</p>
+                    <button class="btn btn-primary" id="hrRunBtn">Generate HR summary</button>
+                    <div class="suite-empty" id="hrEmpty">Generate the summary to see a recruiter-ready blurb.</div>
+                    <div class="suite-result" id="hrResult" style="display:none;">
+                        <div class="card"><p id="hrSummaryText" style="font-size:15px; line-height:1.6;"></p></div>
+                        <div class="roadmap-summary">
+                            <div class="stat"><span class="num" id="hrStage">—</span><span class="label">Seniority stage</span></div>
+                            <div class="stat"><span class="num" id="hrAts">0</span><span class="label">ATS score</span></div>
+                            <div class="stat"><span class="num" id="hrSkills">0</span><span class="label">Skills detected</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Course Explorer -->
+                <div class="suite-panel" id="panel-course-explorer">
+                    <h3>Course Explorer</h3>
+                    <p class="hint">Browse the full course catalog by domain — AI/ML, Cloud, Cybersecurity, Web Dev, Data Science, DevOps, Mobile, UI/UX, Product, and Blockchain — or get courses matched to your own skill gaps.</p>
+                    <div class="grid-2">
+                        <div>
+                            <label class="field-label">Browse a domain</label>
+                            <select id="ceDomain"></select>
+                        </div>
+                        <div style="align-self:flex-end; display:flex; gap:10px;">
+                            <button class="btn btn-primary" id="ceBrowseBtn">Show courses</button>
+                            <button class="btn btn-secondary" id="ceRecommendBtn">Recommend from my resume</button>
+                        </div>
+                    </div>
+                    <div class="suite-empty" id="ceEmpty">Pick a domain or get personalized recommendations.</div>
+                    <div class="suite-result" id="ceResult" style="display:none;">
+                        <div class="course-domain-groups" id="ceGroups"></div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</section>
+
+<!--================ Footer ================-->
+<footer class="site-footer">
+    <div class="container">
+        <div class="logo" style="justify-content:center; display:flex;">AI Career Accelerator</div>
+        <p>Powered by AI, Machine Learning &amp; Data Science — turning one resume into an interview-ready career plan.</p>
+        <div class="social">
+            <a href="https://github.com/rohanbhowm25308" target="_blank" rel="noopener" aria-label="GitHub">GH</a>
+            <a href="https://www.linkedin.com/in/rohan-bhowmik-b014473a1" target="_blank" rel="noopener" aria-label="LinkedIn">in</a>
+            <a href="https://www.instagram.com/rohan_._.bhowmik.84?igsh=MWx3dWM5dHl1dWZsbQ==" target="_blank" rel="noopener" aria-label="ins">Ins</a>
+        </div>
+        <p style="margin-top:18px; font-size:12px; color:var(--text-faint);">Built by Rohan Bhowmik | Aspiring AI/ML, Data Science, Web Devlopment</p>
+    </div>
+</footer>
+
+<!-- AI Digital Recruiter - floating avatar, appears after an analysis runs -->
+<div id="digitalRecruiterWidget" class="dr-widget" style="display:none;">
+    <button class="dr-close" id="drCloseBtn" aria-label="Dismiss">×</button>
+    <div class="dr-row">
+        <div class="dr-avatar">🤖</div>
+        <div class="dr-bubble">
+            <p id="drMessage"></p>
+            <button class="btn btn-primary" id="drActionBtn" style="display:none; margin-top:10px;"></button>
+        </div>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/background.js') }}"></script>
+<script src="{{ url_for('static', filename='js/trajectory.js') }}"></script>
+<script src="{{ url_for('static', filename='js/ai_chip.js') }}"></script>
+<script type="module" src="{{ url_for('static', filename='js/app.js') }}"></script>
+<script type="module" src="{{ url_for('static', filename='js/suite.js') }}"></script>
+</body>
+</html>
