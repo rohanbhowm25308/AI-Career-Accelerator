@@ -738,7 +738,6 @@ async function populateRoleSelects() {
 }
 
 window.addEventListener("DOMContentLoaded", () => {
-    initServerStatus();
     initScrollspy();
     populateRoleSelects();
     loadPersonas();
