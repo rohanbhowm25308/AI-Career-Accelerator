@@ -53,6 +53,136 @@ COMPANY_PROFILES = {
         "weight_skills": 0.30, "weight_ats": 0.45, "weight_impact": 0.25,
         "bar": 68,
     },
+    "IBM": {
+        "emphasis_skills": ["java", "cloud computing", "sql", "system design", "linux"],
+        "weight_skills": 0.35, "weight_ats": 0.35, "weight_impact": 0.30,
+        "bar": 70,
+    },
+    "Adobe": {
+        "emphasis_skills": ["javascript", "react", "css", "system design", "python"],
+        "weight_skills": 0.45, "weight_ats": 0.20, "weight_impact": 0.35,
+        "bar": 73,
+    },
+    "Meta": {
+        "emphasis_skills": ["react", "python", "data structures", "system design", "sql"],
+        "weight_skills": 0.45, "weight_ats": 0.20, "weight_impact": 0.35,
+        "bar": 76,
+    },
+    "Apple": {
+        "emphasis_skills": ["swift", "c++", "system design", "algorithms", "objective-c"],
+        "weight_skills": 0.40, "weight_ats": 0.25, "weight_impact": 0.35,
+        "bar": 77,
+    },
+    "Netflix": {
+        "emphasis_skills": ["java", "aws", "microservices", "system design", "python"],
+        "weight_skills": 0.40, "weight_ats": 0.20, "weight_impact": 0.40,
+        "bar": 75,
+    },
+    "Tesla": {
+        "emphasis_skills": ["python", "c++", "embedded systems", "algorithms", "robotics"],
+        "weight_skills": 0.45, "weight_ats": 0.15, "weight_impact": 0.40,
+        "bar": 74,
+    },
+    "Nvidia": {
+        "emphasis_skills": ["python", "c++", "machine learning", "algorithms", "system design"],
+        "weight_skills": 0.45, "weight_ats": 0.15, "weight_impact": 0.40,
+        "bar": 78,
+    },
+    "Salesforce": {
+        "emphasis_skills": ["salesforce", "javascript", "sql", "rest api", "agile"],
+        "weight_skills": 0.40, "weight_ats": 0.30, "weight_impact": 0.30,
+        "bar": 68,
+    },
+    "Oracle": {
+        "emphasis_skills": ["sql", "java", "cloud computing", "system design", "linux"],
+        "weight_skills": 0.35, "weight_ats": 0.35, "weight_impact": 0.30,
+        "bar": 70,
+    },
+    "Uber": {
+        "emphasis_skills": ["python", "sql", "microservices", "system design", "aws"],
+        "weight_skills": 0.40, "weight_ats": 0.20, "weight_impact": 0.40,
+        "bar": 73,
+    },
+    "Airbnb": {
+        "emphasis_skills": ["react", "javascript", "product management", "sql", "ux design"],
+        "weight_skills": 0.40, "weight_ats": 0.25, "weight_impact": 0.35,
+        "bar": 74,
+    },
+    "Spotify": {
+        "emphasis_skills": ["python", "java", "data engineering", "sql", "aws"],
+        "weight_skills": 0.40, "weight_ats": 0.20, "weight_impact": 0.40,
+        "bar": 71,
+    },
+    "Intel": {
+        "emphasis_skills": ["c++", "python", "algorithms", "system design", "linux"],
+        "weight_skills": 0.45, "weight_ats": 0.20, "weight_impact": 0.35,
+        "bar": 72,
+    },
+    "Cisco": {
+        "emphasis_skills": ["network security", "cybersecurity", "python", "linux", "system design"],
+        "weight_skills": 0.40, "weight_ats": 0.25, "weight_impact": 0.35,
+        "bar": 70,
+    },
+    "Accenture": {
+        "emphasis_skills": ["project management", "agile", "sql", "communication", "excel"],
+        "weight_skills": 0.30, "weight_ats": 0.40, "weight_impact": 0.30,
+        "bar": 62,
+    },
+    "PayPal": {
+        "emphasis_skills": ["java", "python", "cybersecurity", "sql", "system design"],
+        "weight_skills": 0.40, "weight_ats": 0.25, "weight_impact": 0.35,
+        "bar": 73,
+    },
+    "LinkedIn": {
+        "emphasis_skills": ["java", "sql", "system design", "data engineering", "python"],
+        "weight_skills": 0.40, "weight_ats": 0.20, "weight_impact": 0.40,
+        "bar": 75,
+    },
+    "Shopify": {
+        "emphasis_skills": ["ruby on rails", "javascript", "react", "sql", "rest api"],
+        "weight_skills": 0.45, "weight_ats": 0.20, "weight_impact": 0.35,
+        "bar": 69,
+    },
+    "TCS": {
+        "emphasis_skills": ["java", "sql", "communication", "problem solving", "agile"],
+        "weight_skills": 0.30, "weight_ats": 0.45, "weight_impact": 0.25,
+        "bar": 58,
+    },
+    "Infosys": {
+        "emphasis_skills": ["java", "python", "sql", "communication", "agile"],
+        "weight_skills": 0.35, "weight_ats": 0.40, "weight_impact": 0.25,
+        "bar": 60,
+    },
+    "Wipro": {
+        "emphasis_skills": ["java", "sql", "cloud computing", "communication", "agile"],
+        "weight_skills": 0.30, "weight_ats": 0.45, "weight_impact": 0.25,
+        "bar": 58,
+    },
+    "HCLTech": {
+        "emphasis_skills": ["java", "python", "sql", "cybersecurity", "cloud computing"],
+        "weight_skills": 0.35, "weight_ats": 0.40, "weight_impact": 0.25,
+        "bar": 60,
+    },
+    "Flipkart": {
+        "emphasis_skills": ["java", "python", "system design", "sql", "data structures"],
+        "weight_skills": 0.45, "weight_ats": 0.20, "weight_impact": 0.35,
+        "bar": 72,
+    },
+    "Zomato": {
+        "emphasis_skills": ["python", "react", "sql", "system design", "rest api"],
+        "weight_skills": 0.45, "weight_ats": 0.20, "weight_impact": 0.35,
+        "bar": 68,
+    },
+    "Paytm": {
+        "emphasis_skills": ["java", "python", "sql", "cybersecurity", "system design"],
+        "weight_skills": 0.40, "weight_ats": 0.25, "weight_impact": 0.35,
+        "bar": 68,
+    },
+    "Swiggy": {
+        "emphasis_skills": ["python", "java", "system design", "sql", "data structures"],
+        "weight_skills": 0.45, "weight_ats": 0.20, "weight_impact": 0.35,
+        "bar": 69,
+    },
 }
 
 
