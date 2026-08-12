@@ -376,6 +376,38 @@ button, input, textarea, select{ font-family:inherit; }
 .file-drop .file-icon{ font-size:22px; margin-bottom:8px; display:block; }
 .file-name{ margin-top:10px; font-family:var(--font-mono); font-size:12.5px; color:var(--mint); }
 
+input[type="file"]{
+    width:100%;
+    padding:10px 14px;
+    background:var(--surface-2);
+    border:1px solid var(--border);
+    border-radius:var(--radius-md);
+    color:var(--text-muted);
+    font-family:var(--font-body);
+    font-size:13px;
+}
+input[type="file"]::file-selector-button,
+input[type="file"]::-webkit-file-upload-button{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    padding:10px 20px;
+    margin-right:14px;
+    border:none;
+    border-radius:999px;
+    background:var(--accent);
+    color:#1A1200;
+    font-family:var(--font-display);
+    font-weight:600;
+    font-size:13px;
+    cursor:pointer;
+    transition:box-shadow .15s ease, transform .15s ease;
+}
+input[type="file"]::file-selector-button:hover,
+input[type="file"]::-webkit-file-upload-button:hover{
+    box-shadow:0 8px 24px rgba(255,176,32,.28);
+}
+
 textarea, select, input[type="text"], input[type="number"]{
     width:100%;
     background:var(--surface-2);
@@ -1114,3 +1146,9 @@ textarea{ min-height:120px; }
 /* Small course block nested inside an internship track card */
 .track-courses{ margin-top:14px; }
 .track-courses .field-label{ font-size:11px; }
+
+
+
+
+
+
