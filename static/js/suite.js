@@ -1407,6 +1407,27 @@ function initDigitalRecruiter() {
     });
 }
 
+function initCompletionTicks() {
+    const results = document.querySelectorAll(".suite-panel .suite-result");
+    results.forEach((resultEl) => {
+        const panel = resultEl.closest(".suite-panel");
+        if (!panel) return;
+        const suiteKey = panel.id.replace("panel-", "");
+        const tab = document.querySelector(`.suite-tab[data-suite="${suiteKey}"]`);
+        if (!tab) return;
+
+        const markIfVisible = () => {
+            if (resultEl.style.display !== "none" && resultEl.style.display !== "") {
+                tab.classList.add("completed");
+            }
+        };
+        markIfVisible();
+
+        const observer = new MutationObserver(markIfVisible);
+        observer.observe(resultEl, { attributes: true, attributeFilter: ["style"] });
+    });
+}
+
 /*=========================================================
     INIT
 =========================================================*/
@@ -1414,6 +1435,7 @@ function initDigitalRecruiter() {
 window.addEventListener("DOMContentLoaded", () => {
     if (!document.getElementById("ai-suite")) return;
     initTabs();
+    initCompletionTicks();
     populateSuiteRoleSelects();
     initRecruiterMode();
     initHiringSimulation();
