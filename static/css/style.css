@@ -1153,6 +1153,29 @@ textarea{ min-height:120px; }
     font-weight:700;
 }
 
+.suite-tab{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    width:100%;
+    box-sizing:border-box;
+    text-align:left;
+    background:transparent;
+    border:1px solid transparent;
+    color:var(--text-muted);
+    font-family:var(--font-body);
+    font-size:13.5px;
+    font-weight:500;
+    padding:10px 12px;
+    border-radius:var(--radius-sm);
+    cursor:pointer;
+    transition:background .15s ease, color .15s ease, border-color .15s ease;
+    white-space:normal;
+    word-wrap:break-word;
+    overflow-wrap:break-word;
+    line-height:1.35;
+}
 
 
 
