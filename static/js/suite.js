@@ -408,6 +408,8 @@ function initStressTest() {
 function initResumeBattle() {
     const btn = document.getElementById("rbRunBtn");
     if (!btn) return;
+    initFileDrop("rbDropA", "rbFileA", "rbFileANameDisplay");
+    initFileDrop("rbDropB", "rbFileB", "rbFileBNameDisplay");
     btn.addEventListener("click", async () => {
         const fileA = document.getElementById("rbFileA").files[0];
         const fileB = document.getElementById("rbFileB").files[0];
